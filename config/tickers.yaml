@@ -1,0 +1,16 @@
+# Tickers to analyze — add/remove as needed
+tickers:
+  - symbol: AAPL
+    name: Apple Inc.
+  - symbol: MSFT
+    name: Microsoft Corporation
+  - symbol: TSLA
+    name: Tesla Inc.
+  - symbol: NVDA
+    name: NVIDIA Corporation
+  - symbol: AMZN
+    name: Amazon.com Inc.
+  - symbol: SPY
+    name: SPDR S&P 500 ETF
+  - symbol: QQQ
+    name: Invesco QQQ Trust

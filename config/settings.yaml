@@ -1,0 +1,23 @@
+# NASDAQ Data Link settings
+nasdaq:
+  rtat_lookback_days: 30
+  stat_lookback_days: 30
+  uref_lookback_days: 5
+  # Use NDAQ/RTAT10 (free top-10) or NDAQ/RTAT (premium full universe)
+  rtat_table: "NDAQ/RTAT10"
+  stat_table: "NDAQ/STAT"
+  # UREF/FFI — intraday 15-min retail buy/sell flow (current year)
+  uref_table: "UREF/FFI"
+
+# xAI Grok API settings
+grok:
+  model: "grok-4-1-fast-reasoning"
+  temperature: 0.3
+  x_search_enabled: true
+  x_search_lookback_days: 7
+
+# Report settings
+report:
+  output_dir: "output"
+  title: "Market Signal Report"
+  open_browser: true

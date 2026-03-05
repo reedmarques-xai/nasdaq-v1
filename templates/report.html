@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ title }} — {{ generated_at }}</title>
+<style>
+  :root {
+    --bg: #0d1117; --surface: #161b22; --border: #30363d;
+    --text: #e6edf3; --text-muted: #8b949e;
+    --green: #3fb950; --green-bg: #0d3117;
+    --red: #f85149; --red-bg: #3d1117;
+    --yellow: #d29922; --yellow-bg: #3d2e00;
+    --blue: #58a6ff; --blue-bg: #0d2744;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.6;
+    max-width: 1200px; margin: 0 auto; padding: 24px;
+  }
+  h1, h2, h3 { font-weight: 600; }
+  a { color: var(--blue); text-decoration: none; }
+
+  /* Header */
+  .header { text-align: center; margin-bottom: 32px; padding: 32px; background: var(--surface); border-radius: 12px; border: 1px solid var(--border); }
+  .header h1 { font-size: 28px; margin-bottom: 8px; }
+  .header .timestamp { color: var(--text-muted); font-size: 14px; }
+
+  /* Sentiment badges */
+  .badge { display: inline-block; padding: 4px 14px; border-radius: 20px; font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .badge-buy, .badge-bullish { background: var(--green-bg); color: var(--green); border: 1px solid var(--green); }
+  .badge-sell, .badge-bearish { background: var(--red-bg); color: var(--red); border: 1px solid var(--red); }
+  .badge-hold, .badge-neutral { background: var(--yellow-bg); color: var(--yellow); border: 1px solid var(--yellow); }
+
+  /* Market overview */
+  .overview { background: var(--surface); border-radius: 12px; border: 1px solid var(--border); padding: 24px; margin-bottom: 32px; }
+  .overview h2 { margin-bottom: 16px; }
+  .overview .macro { margin: 12px 0; color: var(--text-muted); }
+  .sectors { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-top: 16px; }
+  .sector-card { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px; }
+  .sector-card h4 { font-size: 14px; color: var(--blue); margin-bottom: 4px; }
+  .sector-card p { font-size: 13px; color: var(--text-muted); }
+  .events { margin-top: 16px; }
+  .events li { color: var(--text-muted); margin-left: 20px; font-size: 14px; }
+
+  /* Summary table */
+  .summary-table { width: 100%; border-collapse: collapse; margin-bottom: 32px; background: var(--surface); border-radius: 12px; overflow: hidden; border: 1px solid var(--border); }
+  .summary-table th { background: var(--bg); padding: 12px 16px; text-align: left; font-size: 13px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--border); }
+  .summary-table td { padding: 12px 16px; border-bottom: 1px solid var(--border); font-size: 14px; }
+  .summary-table tr:last-child td { border-bottom: none; }
+  .summary-table tr:hover { background: rgba(88,166,255,0.04); }
+
+  /* Confidence bar */
+  .conf-bar { display: flex; align-items: center; gap: 8px; }
+  .conf-track { width: 80px; height: 8px; background: var(--bg); border-radius: 4px; overflow: hidden; border: 1px solid var(--border); }
+  .conf-fill { height: 100%; border-radius: 4px; }
+  .conf-fill.high { background: var(--green); }
+  .conf-fill.med { background: var(--yellow); }
+  .conf-fill.low { background: var(--red); }
+
+  /* Ticker cards */
+  .ticker-card { background: var(--surface); border-radius: 12px; border: 1px solid var(--border); padding: 24px; margin-bottom: 24px; }
+  .ticker-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; }
+  .ticker-header h2 { font-size: 22px; }
+  .ticker-header .meta { display: flex; align-items: center; gap: 12px; }
+
+  .ticker-sections { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  @media (max-width: 768px) { .ticker-sections { grid-template-columns: 1fr; } }
+
+  .section-box { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+  .section-box h3 { font-size: 14px; color: var(--blue); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .section-box p { font-size: 14px; color: var(--text-muted); }
+
+  .lists { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  @media (max-width: 768px) { .lists { grid-template-columns: 1fr; } }
+  .list-box { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+  .list-box h3 { font-size: 14px; margin-bottom: 8px; }
+  .list-box.catalysts h3 { color: var(--green); }
+  .list-box.risks h3 { color: var(--red); }
+  .list-box li { color: var(--text-muted); font-size: 14px; margin-left: 20px; margin-bottom: 4px; }
+
+  .reasoning { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 16px; }
+  .reasoning h3 { font-size: 14px; color: var(--blue); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .reasoning p { font-size: 14px; color: var(--text-muted); }
+
+  .action-callout { background: var(--blue-bg); border: 1px solid var(--blue); border-radius: 8px; padding: 16px; }
+  .action-callout h3 { font-size: 14px; color: var(--blue); margin-bottom: 4px; }
+  .action-callout p { font-size: 15px; font-weight: 600; }
+
+  /* X Sources */
+  .x-sources { margin-top: 16px; margin-bottom: 16px; }
+  .x-sources-toggle { display: flex; align-items: center; gap: 8px; cursor: pointer; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; width: 100%; text-align: left; color: var(--text); font-size: 14px; font-weight: 600; transition: background 0.15s; }
+  .x-sources-toggle:hover { background: rgba(88,166,255,0.06); }
+  .x-sources-toggle .x-icon { font-size: 16px; }
+  .x-sources-toggle .count { color: var(--blue); font-size: 13px; font-weight: 400; margin-left: auto; }
+  .x-sources-toggle .arrow { transition: transform 0.2s; color: var(--text-muted); }
+  .x-sources-list { display: none; background: var(--bg); border: 1px solid var(--border); border-top: none; border-radius: 0 0 8px 8px; padding: 8px 0; max-height: 320px; overflow-y: auto; }
+  .x-sources-list.open { display: block; }
+  .x-sources-toggle.open { border-radius: 8px 8px 0 0; }
+  .x-sources-toggle.open .arrow { transform: rotate(180deg); }
+  .x-source-item { display: flex; align-items: center; gap: 10px; padding: 8px 16px; font-size: 13px; transition: background 0.1s; }
+  .x-source-item:hover { background: rgba(88,166,255,0.04); }
+  .x-source-item .handle { color: var(--blue); font-weight: 600; min-width: 100px; }
+  .x-source-item .link { color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .x-source-item .link a { color: var(--text-muted); }
+  .x-source-item .link a:hover { color: var(--blue); text-decoration: underline; }
+  .no-sources { color: var(--text-muted); font-size: 13px; padding: 12px 16px; font-style: italic; }
+
+  /* Disclaimer */
+  .disclaimer { text-align: center; padding: 24px; margin-top: 32px; color: var(--text-muted); font-size: 12px; border-top: 1px solid var(--border); }
+</style>
+</head>
+<body>
+
+<!-- ============================================================ -->
+<!-- HEADER                                                        -->
+<!-- ============================================================ -->
+<div class="header">
+  <h1>📊 {{ title }}</h1>
+  <div class="timestamp">Generated {{ generated_at }} · Powered by NASDAQ Data Link + Grok AI</div>
+</div>
+
+<!-- ============================================================ -->
+<!-- MARKET OVERVIEW                                               -->
+<!-- ============================================================ -->
+<div class="overview">
+  <h2>🌍 Market Overview
+    <span class="badge badge-{{ overview.overall_sentiment | lower }}">{{ overview.overall_sentiment }}</span>
+  </h2>
+  <p class="macro">{{ overview.macro_summary }}</p>
+
+  {% if overview.sector_highlights %}
+  <h3 style="margin-top:16px; font-size:15px;">Sector Sentiment</h3>
+  <div class="sectors">
+    {% for sector, sentiment in overview.sector_highlights.items() %}
+    <div class="sector-card">
+      <h4>{{ sector }}</h4>
+      <p>{{ sentiment }}</p>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if overview.key_events %}
+  <div class="events">
+    <h3 style="margin-top:16px; font-size:15px;">📅 Upcoming Events</h3>
+    <ul>
+      {% for event in overview.key_events %}
+      <li>{{ event }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+
+  {% if overview.x_sources %}
+  <div class="x-sources">
+    <button class="x-sources-toggle" onclick="toggleSources(this)">
+      <span class="x-icon">𝕏</span> X Sources
+      <span class="count">{{ overview.x_sources | length }} post{{ "s" if overview.x_sources | length != 1 }}</span>
+      <span class="arrow">▼</span>
+    </button>
+    <div class="x-sources-list">
+      {% for src in overview.x_sources %}
+      <div class="x-source-item">
+        <span class="handle">{{ src.display_label }}</span>
+        <span class="link"><a href="{{ src.url }}" target="_blank" rel="noopener">{{ src.url }}</a></span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<!-- ============================================================ -->
+<!-- SUMMARY TABLE                                                 -->
+<!-- ============================================================ -->
+<table class="summary-table">
+  <thead>
+    <tr>
+      <th>Ticker</th>
+      <th>Name</th>
+      <th>Signal</th>
+      <th>Confidence</th>
+      <th>Recommended Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for s in signals %}
+    <tr>
+      <td><strong>{{ s.symbol }}</strong></td>
+      <td>{{ s.name }}</td>
+      <td><span class="badge badge-{{ s.signal | lower }}">{{ s.signal }}</span></td>
+      <td>
+        <div class="conf-bar">
+          {% if s.confidence >= 7 %}
+            {% set conf_class = "high" %}
+          {% elif s.confidence >= 4 %}
+            {% set conf_class = "med" %}
+          {% else %}
+            {% set conf_class = "low" %}
+          {% endif %}
+          <div class="conf-track"><div class="conf-fill {{ conf_class }}" style="width:{{ s.confidence * 10 }}%"></div></div>
+          <span>{{ s.confidence }}/10</span>
+        </div>
+      </td>
+      <td style="color:var(--text-muted); font-size:13px;">{{ s.recommended_action }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<!-- ============================================================ -->
+<!-- DETAILED TICKER CARDS                                         -->
+<!-- ============================================================ -->
+{% for s in signals %}
+<div class="ticker-card" id="ticker-{{ s.symbol }}">
+  <div class="ticker-header">
+    <h2>{{ s.symbol }} — {{ s.name }}</h2>
+    <div class="meta">
+      <span class="badge badge-{{ s.signal | lower }}">{{ s.signal }}</span>
+      <div class="conf-bar">
+        {% if s.confidence >= 7 %}
+          {% set conf_class = "high" %}
+        {% elif s.confidence >= 4 %}
+          {% set conf_class = "med" %}
+        {% else %}
+          {% set conf_class = "low" %}
+        {% endif %}
+        <div class="conf-track"><div class="conf-fill {{ conf_class }}" style="width:{{ s.confidence * 10 }}%"></div></div>
+        <span>{{ s.confidence }}/10</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="ticker-sections">
+    <div class="section-box">
+      <h3>📈 Retail Flow (RTAT)</h3>
+      <p>{{ s.retail_flow_summary }}</p>
+    </div>
+    <div class="section-box">
+      <h3>📊 Fundamentals (STAT)</h3>
+      <p>{{ s.stat_summary }}</p>
+    </div>
+    <div class="section-box">
+      <h3>🐦 X / Twitter Sentiment</h3>
+      <p>{{ s.x_sentiment }}</p>
+    </div>
+    <div class="section-box">
+      <h3>🧠 Reasoning</h3>
+      <p>{{ s.reasoning }}</p>
+    </div>
+  </div>
+
+  <div class="lists">
+    <div class="list-box catalysts">
+      <h3>🚀 Catalysts</h3>
+      <ul>
+        {% for c in s.catalysts %}
+        <li>{{ c }}</li>
+        {% endfor %}
+        {% if not s.catalysts %}
+        <li>None identified</li>
+        {% endif %}
+      </ul>
+    </div>
+    <div class="list-box risks">
+      <h3>⚠️ Risks</h3>
+      <ul>
+        {% for r in s.risks %}
+        <li>{{ r }}</li>
+        {% endfor %}
+        {% if not s.risks %}
+        <li>None identified</li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+
+  <div class="action-callout">
+    <h3>💡 Recommended Action</h3>
+    <p>{{ s.recommended_action }}</p>
+  </div>
+
+  {% if s.x_sources %}
+  <div class="x-sources">
+    <button class="x-sources-toggle" onclick="toggleSources(this)">
+      <span class="x-icon">𝕏</span> X Sources
+      <span class="count">{{ s.x_sources | length }} post{{ "s" if s.x_sources | length != 1 }}</span>
+      <span class="arrow">▼</span>
+    </button>
+    <div class="x-sources-list">
+      {% for src in s.x_sources %}
+      <div class="x-source-item">
+        <span class="handle">{{ src.display_label }}</span>
+        <span class="link"><a href="{{ src.url }}" target="_blank" rel="noopener">{{ src.url }}</a></span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endfor %}
+
+<!-- ============================================================ -->
+<!-- DISCLAIMER                                                    -->
+<!-- ============================================================ -->
+<div class="disclaimer">
+  <p><strong>⚠️ Disclaimer:</strong> This report is generated by AI and is for informational purposes only.
+  It does not constitute financial advice, investment recommendations, or solicitation to buy or sell securities.
+  Always conduct your own research and consult a qualified financial advisor before making investment decisions.
+  Past performance does not guarantee future results. Trading involves risk of loss.</p>
+</div>
+
+<script>
+function toggleSources(btn) {
+  btn.classList.toggle('open');
+  btn.nextElementSibling.classList.toggle('open');
+}
+</script>
+
+</body>
+</html>
