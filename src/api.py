@@ -21,9 +21,16 @@ load_dotenv()
 
 app = FastAPI(title="Market Signal Generator API")
 
+# Build CORS origins: always allow localhost for dev, plus any
+# production origins set via CORS_ORIGINS env var (comma-separated).
+_cors_origins = ["http://localhost:3000", "http://localhost:3001"]
+_extra = os.getenv("CORS_ORIGINS", "")
+if _extra:
+    _cors_origins.extend(o.strip() for o in _extra.split(",") if o.strip())
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:3001"],
+    allow_origins=_cors_origins,
     allow_methods=["*"],
     allow_headers=["*"],
 )
