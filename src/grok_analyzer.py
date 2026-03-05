@@ -66,7 +66,8 @@ Guidelines:
   based on X/Twitter posts, news flow, and retail activity. 0.0 = perfectly neutral.
 - "sentiment_confidence" is a float from 0.0 to 1.0 representing how confident you \
   are in your sentiment score. 0.0 = no confidence (highly conflicting/insufficient signals), \
-  1.0 = very high confidence (clear consensus sentiment with strong evidence).
+  1.0 = very high confidence (clear consensus sentiment with strong evidence). Be very granular \
+  and dont just default to returning a standard score. Avoid scores being on round numbers such as 0.5, 0.75, etc.
 - Always disclose uncertainty honestly.
 - Return ONLY valid JSON, no markdown fences or extra text.
 """
